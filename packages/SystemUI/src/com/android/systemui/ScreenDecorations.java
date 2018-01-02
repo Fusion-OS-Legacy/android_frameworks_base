@@ -55,6 +55,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -355,6 +356,10 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         mIsRoundedCornerMultipleRadius = mContext.getResources().getBoolean(
                 R.bool.config_roundedCornerMultipleRadius);
         updateRoundedCornerRadii();
+
+        Dependency.get(Dependency.MAIN_HANDLER).post(
+                () -> Dependency.get(TunerService.class).addTunable(this, SIZE));
+
         if (hasRoundedCorners() || shouldDrawCutout() || shouldHostHandles()) {
             setupDecorations();
             setupCameraListener();
@@ -434,8 +439,6 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
         mDensity = metrics.density;
 
-        Dependency.get(Dependency.MAIN_HANDLER).post(
-                () -> Dependency.get(TunerService.class).addTunable(this, SIZE));
 
         // Watch color inversion and invert the overlay as needed.
         mColorInversionSetting = new SecureSetting(mContext, mHandler,
@@ -691,8 +694,8 @@ public class ScreenDecorations extends SystemUI implements Tunable,
     }
 
     private boolean hasRoundedCorners() {
-        return mRoundedDefault > 0 || mRoundedDefaultBottom > 0 || mRoundedDefaultTop > 0
-                || mIsRoundedCornerMultipleRadius;
+        return mRoundedDefault > 0 || mRoundedDefaultBottom > 0 || mRoundedDefaultTop > 0 ||
+                Secure.getIntForUser(mContext.getContentResolver(), SIZE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     private boolean shouldDrawCutout() {
@@ -710,10 +713,7 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         // screen decorations overlay.
         int padding = mContext.getResources().getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding);
-        if (padding != 0) {
-            setupStatusBarPadding(padding);
-        }
-
+        setupStatusBarPadding(padding);
     }
 
     private void setupStatusBarPadding(int padding) {
@@ -787,10 +787,15 @@ public class ScreenDecorations extends SystemUI implements Tunable,
     @Override
     public void onTuningChanged(String key, String newValue) {
         mHandler.post(() -> {
-            if (mOverlay == null) return;
             // If custom cutout is used, initRoundCornerViews() will set the size
             if (mCustomCutout) return;
             if (SIZE.equals(key)) {
+                if (mOverlay == null) {
+                    if (TunerService.parseIntegerSwitch(newValue, false))
+                        setupDecorations();
+                    else
+                        return;
+                }
                 int size = mRoundedDefault;
                 int sizeTop = mRoundedDefaultTop;
                 int sizeBottom = mRoundedDefaultBottom;
@@ -808,6 +813,7 @@ public class ScreenDecorations extends SystemUI implements Tunable,
                     sizeBottom = size;
                 }
 
+                updateWindowVisibilities();
                 setSize(mOverlay.findViewById(R.id.left), sizeTop);
                 setSize(mOverlay.findViewById(R.id.right), sizeTop);
                 setSize(mBottomOverlay.findViewById(R.id.left), sizeBottom);
@@ -1330,3 +1336,4 @@ public class ScreenDecorations extends SystemUI implements Tunable,
         bottomRight.setRotationY(180.0f);
     }
 }
+
