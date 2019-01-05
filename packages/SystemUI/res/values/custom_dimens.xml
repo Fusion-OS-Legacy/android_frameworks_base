@@ -55,4 +55,11 @@
     <dimen name="dismiss_all_button_margin_bottom">35dp</dimen>
     <dimen name="dismiss_all_fab_src_size">30dp</dimen>
 
+    <!-- Old style mobile data indicators -->
+    <dimen name="status_bar_mobile_signal_with_type_width">22dp</dimen>
+    <dimen name="status_bar_mobile_signal_width">16dp</dimen>
+    <dimen name="status_bar_mobile_type_height">10dp</dimen>
+
+    <!-- the padding on the start and the end of the statusbar -->
+    <dimen name="status_bar_extra_padding">0dp</dimen>
 </resources>
