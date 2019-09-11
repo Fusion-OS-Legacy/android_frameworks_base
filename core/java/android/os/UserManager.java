@@ -1257,9 +1257,10 @@ public class UserManager {
      * @return whether the device supports multiple users.
      */
     public static boolean supportsMultipleUsers() {
-        return getMaxSupportedUsers() > 1
+        return false;
+        /*return getMaxSupportedUsers() > 1
                 && SystemProperties.getBoolean("fw.show_multiuserui",
-                Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));
+                Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));*/
     }
 
     /**
@@ -2928,6 +2929,8 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public static int getMaxSupportedUsers() {
+        return 1;
+        /*
         // Don't allow multiple users on certain builds
         if (android.os.Build.ID.startsWith("JVP")) return 1;
         if (ActivityManager.isLowRamDeviceStatic()) {
@@ -2938,7 +2941,7 @@ public class UserManager {
             }
         }
         return SystemProperties.getInt("fw.max_users",
-                Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
+                Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));*/
     }
 
     /**
