@@ -208,4 +208,6 @@
 
     <color name="GM2_yellow_500">#FFFBBC04</color>
     <color name="GM2_green_500">#FF34A853</color>
+
+    <color name="keyguard_affordance_background_color">#80000000</color>
 </resources>
