@@ -278,4 +278,5 @@
     <color name="dismiss_all_background_color_ripple">#a8a8a8</color>
     <color name="dismiss_all_icon_color">#8a000000</color>
 
+   <color name="keyguard_affordance_background_color">#80000000</color>
 </resources>
