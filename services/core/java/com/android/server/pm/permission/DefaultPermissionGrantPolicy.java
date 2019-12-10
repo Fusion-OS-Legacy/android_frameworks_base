@@ -790,6 +790,19 @@ public final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage("com.google.android.gsf", userId, CONTACTS_PERMISSIONS,
                 PHONE_PERMISSIONS);
 
+        // Google Setup Wizard
+        grantSystemFixedPermissionsToSystemPackage("com.google.android.setupwizard", userId, CONTACTS_PERMISSIONS,
+                PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, CAMERA_PERMISSIONS, SMS_PERMISSIONS,
+                STORAGE_PERMISSIONS);
+
+        // Android Setup
+        grantSystemFixedPermissionsToSystemPackage("com.google.android.apps.restore", userId, PHONE_PERMISSIONS,
+                CONTACTS_PERMISSIONS, SMS_PERMISSIONS);
+
+        // Carrier Setup
+        grantSystemFixedPermissionsToSystemPackage("com.google.android.carriersetup", userId, PHONE_PERMISSIONS,
+                SMS_PERMISSIONS);
+
         // Google Play Store
         grantSystemFixedPermissionsToSystemPackage("com.android.vending", userId, CONTACTS_PERMISSIONS,
                 PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS, STORAGE_PERMISSIONS);
