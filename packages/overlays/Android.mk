@@ -55,6 +55,7 @@ LOCAL_REQUIRED_MODULES := \
 	IconShapeHexagonOverlay \
 	IconShapeRoundedHexagonOverlay \
 	IconShapeRoundedRectOverlay \
+	IconShapeSquareOverlay \
 	IconShapeSquircleOverlay \
 	IconShapeTeardropOverlay \
         GestureStyleIOSOverlay \
