@@ -192,6 +192,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.GestureRecorder;
+import com.android.systemui.statusbar.info.DataUsageView;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -465,6 +466,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
+    private boolean dataupdated = false;
     public ImageView mQSBlurView;
     private boolean blurperformed = false;
 
@@ -1097,6 +1099,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         int QSBlurAlpha = Math.round(255.0f *
                 mNotificationPanel.getExpandedFraction() * (float)((float) QSUserAlpha / 100.0));
 
+        if (QSBlurAlpha > 0 && !dataupdated && !mIsKeyguard) {
+            DataUsageView.updateUsage();
+            dataupdated = true;
+        }
+
         if (QSBlurAlpha > 0 && !blurperformed && !mIsKeyguard && isQSBlurEnabled()) {
             Bitmap bittemp = ImageUtilities.blurImage(mContext, ImageUtilities.screenshotSurface(mContext));
             Drawable blurbackground = new BitmapDrawable(mContext.getResources(), bittemp);
@@ -1104,6 +1111,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mQSBlurView.setBackgroundDrawable(blurbackground);
         } else if (QSBlurAlpha == 0 || mState == StatusBarState.KEYGUARD) {
             blurperformed = false;
+            dataupdated = false;
             mQSBlurView.setBackgroundColor(Color.TRANSPARENT);
         }
         mQSBlurView.setAlpha(QSBlurAlpha);

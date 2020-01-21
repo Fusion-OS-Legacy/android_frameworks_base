@@ -4632,11 +4632,17 @@ public final class Settings {
          * Whether to wake the screen with the home key, the value is boolean.
          * 0 = 0ff, 1 = on
          */
-        public static final String HOME_WAKE_SCREEN = "home_wake_screen";
 
+         public static final String HOME_WAKE_SCREEN = "home_wake_screen";
+        
         /** @hide */
         public static final Validator HOME_WAKE_SCREEN_VALIDATOR =
                 BOOLEAN_VALIDATOR;
+        /**
+         * Show data usage in QS header
+         * @hide
+         */
+        public static final String QS_DATAUSAGE = "qs_datausage";
 
         /**
          * Whether to wake the screen with the back key, the value is boolean.
