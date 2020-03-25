@@ -752,6 +752,10 @@ public final class DefaultPermissionGrantPolicy {
             grantPermissionsToPackage(themePickerPackage, userId, false /* ignoreSystemPackage */,
                     true /*whitelistRestrictedPermissions*/, STORAGE_PERMISSIONS);
         }
+
+        // Lawnchair
+        grantSystemFixedPermissionsToSystemPackage("ch.deletescape.lawnchair.ci", userId, STORAGE_PERMISSIONS);
+ 
     }
 
     private String getDefaultSystemHandlerActivityPackageForCategory(String category, int userId) {
