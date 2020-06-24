@@ -51,14 +51,17 @@ LOCAL_REQUIRED_MODULES := \
 	IconPackRoundedPixelLauncherOverlay \
 	IconPackRoundedPixelThemePickerOverlay \
 	IconPackRoundedSettingsOverlay \
-	IconPackRoundedSystemUIOverla \
+	IconPackRoundedSystemUIOverlay \
+         IconShapePebbleOverlay \
 	IconShapeHexagonOverlay \
 	IconShapeRoundedHexagonOverlay \
 	IconShapeRoundedRectOverlay \
         IconShapeSquareOverlay \
         IconShapeCylinderOverlay \
 	IconShapeSquircleOverlay \
+    IconShapeTaperedRectOverlay \
 	IconShapeTeardropOverlay \
+         IconShapeVesselOverlay \
         GestureStyleIOSOverlay \
         GestureStyleImmersiveOverlay \
 	NavigationBarMode3ButtonOverlay \
@@ -75,3 +78,5 @@ LOCAL_MODULE := frameworks-base-overlays-debug
 
 include $(BUILD_PHONY_PACKAGE)
 include $(call first-makefiles-under,$(LOCAL_PATH))
+
+
