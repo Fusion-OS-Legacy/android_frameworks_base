@@ -107,5 +107,10 @@
 
     <!-- controls -->
     <color name="control_default_background">#19ffffff</color> <!-- 10% white -->
+    
+    <!-- Clear all notifications button -->
+    <color name="dismiss_all_background_color">#1a1a1a</color>
+    <color name="dismiss_all_background_color_ripple">#555555</color>
+    <color name="dismiss_all_icon_color">@android:color/white</color>
 
 </resources>
