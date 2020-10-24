@@ -1,4 +1,4 @@
-
+/*
  * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -164,7 +164,7 @@ public final class ClockManager {
         addBuiltinClock(() -> new DotClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new SpectrumClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new SpideyClockController(res, layoutInflater, colorExtractor));
-        addBuiltinClock(() -> new TypeClockController(res, layoutInflater, colorExtractor, context));
+        addBuiltinClock(() -> new TypeClockController(res, layoutInflater, colorExtractor));
 
         // Store the size of the display for generation of clock preview.
         DisplayMetrics dm = res.getDisplayMetrics();
