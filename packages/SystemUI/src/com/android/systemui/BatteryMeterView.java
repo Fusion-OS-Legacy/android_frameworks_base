@@ -105,6 +105,9 @@ public class BatteryMeterView extends LinearLayout implements
     private DualToneHandler mDualToneHandler;
     private int mUser;
 
+
+    protected BatteryBoltChargeView mBatteryBoltChargeView;
+
     /**
      * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
      */
@@ -154,6 +157,13 @@ public class BatteryMeterView extends LinearLayout implements
         mlp.setMargins(0, 0, 0,
                 getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
         addView(mBatteryIconView, mlp);
+
+        mBatteryBoltChargeView = new BatteryBoltChargeView(context, null);
+        final MarginLayoutParams mlp2 = new MarginLayoutParams(
+                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_bolt_icon_width),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_bolt_icon_height));
+        mlp2.setMargins(0, 0, 0, 0);
+        addView(mBatteryBoltChargeView, mlp2);
 
         updateShowPercent();
         mDualToneHandler = new DualToneHandler(context);
@@ -308,6 +318,7 @@ public class BatteryMeterView extends LinearLayout implements
         updateShowPercent();
         subscribeForTunerUpdates();
         mUserTracker.startTracking();
+        updateBatteryMeterVisibility();
     }
 
     @Override
@@ -326,6 +337,8 @@ public class BatteryMeterView extends LinearLayout implements
         mCharging = pluggedIn;
         mLevel = level;
         updatePercentText();
+        updateBoltChargeView();
+        updateBatteryMeterVisibility();
     }
 
     @Override
@@ -418,6 +431,23 @@ public class BatteryMeterView extends LinearLayout implements
         scaleBatteryMeterViews();
     }
 
+    public void updateBoltChargeView() {
+        if (mCharging) {
+            mBatteryBoltChargeView.setLevel(mLevel);
+            mBatteryBoltChargeView.setVisibility(View.VISIBLE);
+            return;
+        }
+        mBatteryBoltChargeView.setVisibility(View.GONE);
+    }
+
+    private void updateBatteryMeterVisibility() {
+        if (mCharging) {
+            mBatteryIconView.setVisibility(View.GONE);
+        } else {
+            mBatteryIconView.setVisibility(View.VISIBLE);
+        }
+    }
+
     /**
      * Looks up the scale factor for status bar icons and scales the battery view by that amount.
      */
@@ -437,6 +467,9 @@ public class BatteryMeterView extends LinearLayout implements
         scaledLayoutParams.setMargins(0, 0, 0, marginBottom);
 
         mBatteryIconView.setLayoutParams(scaledLayoutParams);
+
+        mBatteryBoltChargeView.updateViews();
+        mBatteryBoltChargeView.setLayoutParams(mBatteryBoltChargeView.getLayoutParams());
     }
 
     @Override
@@ -450,6 +483,7 @@ public class BatteryMeterView extends LinearLayout implements
             updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor,
                     mNonAdaptedSingleToneColor);
         }
+        mBatteryBoltChargeView.setIconTint(tint);
     }
 
     private void updateColors(int foregroundColor, int backgroundColor, int singleToneColor) {
@@ -458,6 +492,7 @@ public class BatteryMeterView extends LinearLayout implements
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setTextColor(singleToneColor);
         }
+        mBatteryBoltChargeView.setIconTint(foregroundColor);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
