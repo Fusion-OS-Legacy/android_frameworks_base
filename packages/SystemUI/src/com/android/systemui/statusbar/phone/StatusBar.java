@@ -75,6 +75,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.drawable.GradientDrawable;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -117,6 +118,9 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
@@ -170,6 +174,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -337,6 +342,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final VolumeComponent mVolumeComponent;
     private BrightnessMirrorController mBrightnessMirrorController;
+    private BrightnessMirrorController mQuickBrightnessMirrorController;
     private boolean mBrightnessMirrorVisible;
     private BiometricUnlockController mBiometricUnlockController;
     private final LightBarController mLightBarController;
@@ -444,6 +450,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final ScreenPinningRequest mScreenPinningRequest;
 
     private final MetricsLogger mMetricsLogger;
+
+    private ImageButton mDismissAllButton;
+    public boolean mClearableNotifications = true;
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     @VisibleForTesting
@@ -1012,6 +1021,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         inflateStatusBarWindow();
         mNotificationShadeWindowViewController.setService(this, mNotificationShadeWindowController);
         mNotificationShadeWindowView.setOnTouchListener(getStatusBarWindowTouchListener());
+        mDismissAllButton = mNotificationShadeWindowView.findViewById(R.id.clear_notifications);
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
@@ -1189,11 +1199,19 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mBrightnessMirrorVisible = visible;
                         updateScrimController();
                     });
+            mQuickBrightnessMirrorController = new BrightnessMirrorController(
+                    mNotificationShadeWindowView,
+                    mNotificationPanelViewController,
+                    mNotificationShadeDepthControllerLazy.get(),
+                    (visible) -> {
+                        mBrightnessMirrorVisible = visible;
+                        updateScrimController();
+                    });
             fragmentHostManager.addTagListener(QS.TAG, (tag, f) -> {
                 QS qs = (QS) f;
                 if (qs instanceof QSFragment) {
                     mQSPanel = ((QSFragment) qs).getQsPanel();
-                    mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
+                    mQSPanel.setBrightnessMirror(mQuickBrightnessMirrorController);
                 }
             });
         }
@@ -1289,6 +1307,49 @@ public class StatusBar extends SystemUI implements DemoMode,
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, null, UserHandle.ALL);
+    }
+
+    public void updateDismissAllVisibility(boolean visible) {
+        if (mClearableNotifications && mState != StatusBarState.KEYGUARD && visible) {
+            mDismissAllButton.setVisibility(View.VISIBLE);
+            int DismissAllAlpha = Math.round(255.0f * mNotificationPanelViewController.getExpandedFraction());
+            mDismissAllButton.setAlpha(DismissAllAlpha);
+            mDismissAllButton.getBackground().setAlpha(DismissAllAlpha);
+        } else {
+            mDismissAllButton.setAlpha(0);
+            mDismissAllButton.getBackground().setAlpha(0);
+            mDismissAllButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    public void updateDismissAllButton(int iconcolor) {
+        if (mDismissAllButton != null) {
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mDismissAllButton.getLayoutParams();
+            layoutParams.width = mContext.getResources().getDimensionPixelSize(R.dimen.dismiss_all_button_width);
+            layoutParams.height = mContext.getResources().getDimensionPixelSize(R.dimen.dismiss_all_button_height);
+            layoutParams.bottomMargin = mContext.getResources().getDimensionPixelSize(R.dimen.dismiss_all_button_margin_bottom);
+            mDismissAllButton.setElevation(mContext.getResources().getDimension(R.dimen.dismiss_all_button_elevation));
+            mDismissAllButton.setColorFilter(iconcolor);
+            mDismissAllButton.setBackground(mContext.getResources().getDrawable(R.drawable.dismiss_all_background));
+        }
+    }
+
+    public void updateDismissAllButtonOnlyDimens() {
+        if (mDismissAllButton != null) {
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) mDismissAllButton.getLayoutParams();
+            layoutParams.width = mContext.getResources().getDimensionPixelSize(R.dimen.dismiss_all_button_width);
+            layoutParams.height = mContext.getResources().getDimensionPixelSize(R.dimen.dismiss_all_button_height);
+            layoutParams.bottomMargin = mContext.getResources().getDimensionPixelSize(R.dimen.dismiss_all_button_margin_bottom);
+            mDismissAllButton.setElevation(mContext.getResources().getDimension(R.dimen.dismiss_all_button_elevation));
+        }
+    }
+
+    public void setHasClearableNotifs(boolean notifs) {
+        mClearableNotifications = notifs;
+    }
+
+    public View getDismissAllButton() {
+        return mDismissAllButton;
     }
 
     protected QS createDefaultQSFragment() {
@@ -1396,6 +1457,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();
         }
+        if (mQuickBrightnessMirrorController != null) {
+            mQuickBrightnessMirrorController.onDensityOrFontScaleChanged();
+        }
         // TODO: Bring these out of StatusBar.
         mUserInfoControllerImpl.onDensityOrFontScaleChanged();
         mUserSwitcherController.onDensityOrFontScaleChanged();
@@ -1422,6 +1486,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onOverlayChanged();
         }
+        if (mQuickBrightnessMirrorController != null) {
+            mQuickBrightnessMirrorController.onOverlayChanged();
+        }
         // We need the new R.id.keyguard_indication_area before recreating
         // mKeyguardIndicationController
         mNotificationPanelViewController.onThemeChanged();
@@ -1432,6 +1499,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onUiModeChanged() {
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onUiModeChanged();
+        }
+        if (mQuickBrightnessMirrorController != null) {
+            mQuickBrightnessMirrorController.onUiModeChanged();
         }
     }
 
@@ -2922,6 +2992,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.updateResources();
         }
+        if (mQuickBrightnessMirrorController != null) {
+            mQuickBrightnessMirrorController.updateResources();
+        }
     }
 
     // Visibility reporting
@@ -3557,6 +3630,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onStateChanged(int newState) {
+        if (mState != newState) {
+            updateDismissAllVisibility(true);
+        }
         mState = newState;
         updateReportRejectedTouchVisibility();
         mDozeServiceHost.updateDozing();
